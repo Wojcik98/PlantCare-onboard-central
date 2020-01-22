@@ -8,23 +8,22 @@ uuid = 'a08b1a8a-dfac-4606-b2c4-761c06969416'
 
 
 def main():
-    query = plantcare_pb2.Query()
-    query.get_flower_data.flower_id = 1
-    query.get_flower_data.since_time = 1
-    print(query.SerializeToString().decode('utf-8'))
-
-    call("sudo sdptool add SP", shell=True)
-
+    setup_pairing()
     server_loop()
 
 
-def server_loop():
+def setup_pairing():
     autopair = BtAutoPair()
+    autopair.disable_pairing()
+    autopair.enable_pairing()
+    call("sudo sdptool add SP", shell=True)
+
+
+def server_loop():
     host = ''
     port = 1
 
     while True:
-        autopair.enable_pairing()
         server = bt.BluetoothSocket(bt.RFCOMM)
         server.bind((host, port))
         server.listen(1)
@@ -32,9 +31,7 @@ def server_loop():
 
         print('Listening')
         client, _ = server.accept()
-
         print('Connected')
-        autopair.disable_pairing()
         client_loop(client)
 
         print('Disconnected!')
