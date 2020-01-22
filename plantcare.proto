@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package plantcare;
+
+option optimize_for = LITE_RUNTIME;
+
+message Query {
+    oneof query {
+        GetIdsQuery get_ids = 1;
+        GetFlowerDataQuery get_flower_data = 2;
+        SetWateringQuery set_watering = 3;
+    }
+}
+
+message Response {
+    oneof response {
+        IdsResponse ids = 1;
+        FlowerDataResponse flower_data = 2;
+        WateringSetResponse watering_set = 3;
+    }
+}
+
+message GetIdsQuery {
+}
+
+message GetFlowerDataQuery {
+    uint32 flower_id = 1;
+    uint32 since_time = 2;
+}
+
+message SetWateringQuery {
+    uint32 flower_id = 1;
+    sint32 period = 2;
+}
+
+message IdsResponse {
+    repeated uint32 flower_ids = 1;
+}
+
+message FlowerDataResponse {
+    uint32 flower_id = 1;
+    repeated uint32 measurement_timestamps = 2;
+    repeated uint32 moisture_measurements = 3;
+    repeated uint32 light_measurements = 4;
+    repeated uint32 watering_timestamps = 5;
+}
+
+message WateringSetResponse {
+}
