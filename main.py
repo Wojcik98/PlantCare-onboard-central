@@ -1,5 +1,6 @@
 import bluetooth as bt
 from subprocess import call
+import sqlite3
 
 from auto_pair import BtAutoPair
 import plantcare_pb2
@@ -22,6 +23,8 @@ def setup_pairing():
 def server_loop():
     host = ''
     port = 1
+    connection = sqlite3.connect('plantcare.db')
+    cursor = connection.cursor()
 
     while True:
         server = bt.BluetoothSocket(bt.RFCOMM)
@@ -32,13 +35,13 @@ def server_loop():
         print('Listening')
         client, _ = server.accept()
         print('Connected')
-        client_loop(client)
+        client_loop(client, cursor)
 
         print('Disconnected!')
         server.close()
 
 
-def client_loop(client: bt.BluetoothSocket):
+def client_loop(client: bt.BluetoothSocket, cursor: sqlite3.Cursor):
     while True:
         try:
             print('Try receiving')
@@ -50,11 +53,11 @@ def client_loop(client: bt.BluetoothSocket):
             print(f'Query type: {query_type}')
 
             if query_type == 'get_ids':
-                response = encode_ids()
+                response = encode_ids(cursor)
             elif query_type == 'get_flower_data':
                 flower_id = query.get_flower_data.flower_id
                 since_time = query.get_flower_data.since_time
-                response = encode_flower_data(flower_id, since_time)
+                response = encode_flower_data(flower_id, since_time, cursor)
             elif query_type == 'set_watering':
                 flower_id = query.set_watering.flower_id
                 period = query.set_watering.period
@@ -73,23 +76,37 @@ def client_loop(client: bt.BluetoothSocket):
             break
 
 
-def encode_ids():
-    response = plantcare_pb2.Response()
+def encode_ids(cursor: sqlite3.Cursor):
 
-    # TODO implement properly
-    response.ids.flower_ids.append(42)
+    rows = cursor.execute('SELECT * FROM flower_ids')
+    ids = [id_ for (id_,) in rows]
+    print(f'Ids: {ids}')
+
+    response = plantcare_pb2.Response()
+    response.ids.flower_ids.extend(ids)
 
     return response
 
 
-def encode_flower_data(flower_id, since_time):
-    response = plantcare_pb2.Response()
+def encode_flower_data(flower_id, since_time, cursor: sqlite3.Cursor):
+    query = f'SELECT * FROM readings ' \
+            f'WHERE flower_id = {flower_id} AND timestamp > {since_time}'
+    rows = cursor.execute(query)
+    rows = [row for row in rows]
+    print(rows)
 
-    # TODO implement properly
+    timestamps = [timestamp for (_, _, _, timestamp) in rows]
+    lights = [light for (_, light, _, _) in rows]
+    moistures = [moisture for (_, _, moisture, _) in rows]
+    print(f'Timestamps: {timestamps}')
+    print(f'Lights: {lights}')
+    print(f'Moistures: {moistures}')
+
+    response = plantcare_pb2.Response()
     response.flower_data.flower_id = flower_id
-    response.flower_data.measurement_timestamps.append(42)
-    response.flower_data.moisture_measurements.append(43)
-    response.flower_data.light_measurements.append(44)
+    response.flower_data.measurement_timestamps.extend(timestamps)
+    response.flower_data.light_measurements.extend(lights)
+    response.flower_data.moisture_measurements.extend(moistures)
     response.flower_data.watering_timestamps.append(45)
 
     return response
