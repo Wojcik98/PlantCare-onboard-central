@@ -35,13 +35,13 @@ def server_loop():
         print('Listening')
         client, _ = server.accept()
         print('Connected')
-        client_loop(client, cursor)
+        client_loop(client, cursor, connection)
 
         print('Disconnected!')
         server.close()
 
 
-def client_loop(client: bt.BluetoothSocket, cursor: sqlite3.Cursor):
+def client_loop(client: bt.BluetoothSocket, cursor: sqlite3.Cursor, connection: sqlite3.Connection):
     while True:
         try:
             print('Try receiving')
@@ -62,7 +62,7 @@ def client_loop(client: bt.BluetoothSocket, cursor: sqlite3.Cursor):
                 flower_id = query.set_watering.flower_id
                 hour = query.set_watering.hour
                 days = query.set_watering.days
-                set_watering(flower_id, hour, days, cursor)
+                set_watering(flower_id, hour, days, cursor, connection)
                 response = encode_watering_set()
             else:
                 continue
@@ -127,7 +127,7 @@ def decode_message(raw):
     return query
 
 
-def set_watering(flower_id, hour, days, cursor: sqlite3.Cursor):
+def set_watering(flower_id, hour, days, cursor: sqlite3.Cursor, connection: sqlite3.Connection):
     print(f'flower_id: {flower_id}, hour: {hour}, days: {days}')
     cursor.execute(f'SELECT * FROM watering WHERE flower_id={flower_id}')
     exists = cursor.fetchone()
@@ -143,7 +143,7 @@ def set_watering(flower_id, hour, days, cursor: sqlite3.Cursor):
             f'WHERE flower_id={flower_id}'
         )
 
-    # TODO commit
+    connection.commit()
     all = cursor.execute('SELECT * FROM watering')
     all = [row for row in all]
 
