@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='plantcare.proto',
   package='plantcare',
   syntax='proto3',
-  serialized_pb=_b('\n\x0fplantcare.proto\x12\tplantcare\"\xaa\x01\n\x05Query\x12)\n\x07get_ids\x18\x01 \x01(\x0b\x32\x16.plantcare.GetIdsQueryH\x00\x12\x38\n\x0fget_flower_data\x18\x02 \x01(\x0b\x32\x1d.plantcare.GetFlowerDataQueryH\x00\x12\x33\n\x0cset_watering\x18\x03 \x01(\x0b\x32\x1b.plantcare.SetWateringQueryH\x00\x42\x07\n\x05query\"\xab\x01\n\x08Response\x12%\n\x03ids\x18\x01 \x01(\x0b\x32\x16.plantcare.IdsResponseH\x00\x12\x34\n\x0b\x66lower_data\x18\x02 \x01(\x0b\x32\x1d.plantcare.FlowerDataResponseH\x00\x12\x36\n\x0cwatering_set\x18\x03 \x01(\x0b\x32\x1e.plantcare.WateringSetResponseH\x00\x42\n\n\x08response\"\r\n\x0bGetIdsQuery\";\n\x12GetFlowerDataQuery\x12\x11\n\tflower_id\x18\x01 \x01(\r\x12\x12\n\nsince_time\x18\x02 \x01(\r\"5\n\x10SetWateringQuery\x12\x11\n\tflower_id\x18\x01 \x01(\r\x12\x0e\n\x06period\x18\x02 \x01(\x11\"!\n\x0bIdsResponse\x12\x12\n\nflower_ids\x18\x01 \x03(\r\"\x9f\x01\n\x12\x46lowerDataResponse\x12\x11\n\tflower_id\x18\x01 \x01(\r\x12\x1e\n\x16measurement_timestamps\x18\x02 \x03(\r\x12\x1d\n\x15moisture_measurements\x18\x03 \x03(\r\x12\x1a\n\x12light_measurements\x18\x04 \x03(\r\x12\x1b\n\x13watering_timestamps\x18\x05 \x03(\r\"\x15\n\x13WateringSetResponseB\x02H\x03\x62\x06proto3')
+  serialized_pb=_b('\n\x0fplantcare.proto\x12\tplantcare\"\xaa\x01\n\x05Query\x12)\n\x07get_ids\x18\x01 \x01(\x0b\x32\x16.plantcare.GetIdsQueryH\x00\x12\x38\n\x0fget_flower_data\x18\x02 \x01(\x0b\x32\x1d.plantcare.GetFlowerDataQueryH\x00\x12\x33\n\x0cset_watering\x18\x03 \x01(\x0b\x32\x1b.plantcare.SetWateringQueryH\x00\x42\x07\n\x05query\"\xab\x01\n\x08Response\x12%\n\x03ids\x18\x01 \x01(\x0b\x32\x16.plantcare.IdsResponseH\x00\x12\x34\n\x0b\x66lower_data\x18\x02 \x01(\x0b\x32\x1d.plantcare.FlowerDataResponseH\x00\x12\x36\n\x0cwatering_set\x18\x03 \x01(\x0b\x32\x1e.plantcare.WateringSetResponseH\x00\x42\n\n\x08response\"\r\n\x0bGetIdsQuery\";\n\x12GetFlowerDataQuery\x12\x11\n\tflower_id\x18\x01 \x01(\r\x12\x12\n\nsince_time\x18\x02 \x01(\r\"A\n\x10SetWateringQuery\x12\x11\n\tflower_id\x18\x01 \x01(\r\x12\x0c\n\x04hour\x18\x02 \x01(\x11\x12\x0c\n\x04\x64\x61ys\x18\x03 \x03(\x11\"!\n\x0bIdsResponse\x12\x12\n\nflower_ids\x18\x01 \x03(\r\"\x82\x01\n\x12\x46lowerDataResponse\x12\x11\n\tflower_id\x18\x01 \x01(\r\x12\x1e\n\x16measurement_timestamps\x18\x02 \x03(\r\x12\x1d\n\x15moisture_measurements\x18\x03 \x03(\r\x12\x1a\n\x12light_measurements\x18\x04 \x03(\r\"\x15\n\x13WateringSetResponseB\x02H\x03\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -199,9 +199,16 @@ _SETWATERINGQUERY = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='period', full_name='plantcare.SetWateringQuery.period', index=1,
+      name='hour', full_name='plantcare.SetWateringQuery.hour', index=1,
       number=2, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='days', full_name='plantcare.SetWateringQuery.days', index=2,
+      number=3, type=17, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -218,7 +225,7 @@ _SETWATERINGQUERY = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=453,
-  serialized_end=506,
+  serialized_end=518,
 )
 
 
@@ -248,8 +255,8 @@ _IDSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=508,
-  serialized_end=541,
+  serialized_start=520,
+  serialized_end=553,
 )
 
 
@@ -288,13 +295,6 @@ _FLOWERDATARESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
-    _descriptor.FieldDescriptor(
-      name='watering_timestamps', full_name='plantcare.FlowerDataResponse.watering_timestamps', index=4,
-      number=5, type=13, cpp_type=3, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
   ],
   extensions=[
   ],
@@ -307,8 +307,8 @@ _FLOWERDATARESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=544,
-  serialized_end=703,
+  serialized_start=556,
+  serialized_end=686,
 )
 
 
@@ -331,8 +331,8 @@ _WATERINGSETRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=705,
-  serialized_end=726,
+  serialized_start=688,
+  serialized_end=709,
 )
 
 _QUERY.fields_by_name['get_ids'].message_type = _GETIDSQUERY

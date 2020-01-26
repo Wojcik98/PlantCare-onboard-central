@@ -30,7 +30,8 @@ message GetFlowerDataQuery {
 
 message SetWateringQuery {
     uint32 flower_id = 1;
-    sint32 period = 2;
+    sint32 hour = 2;
+    repeated sint32 days = 3;
 }
 
 message IdsResponse {
@@ -42,7 +43,6 @@ message FlowerDataResponse {
     repeated uint32 measurement_timestamps = 2;
     repeated uint32 moisture_measurements = 3;
     repeated uint32 light_measurements = 4;
-    repeated uint32 watering_timestamps = 5;
 }
 
 message WateringSetResponse {

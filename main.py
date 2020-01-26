@@ -1,5 +1,5 @@
 import bluetooth as bt
-from subprocess import call
+from subprocess import call, run
 import sqlite3
 
 from auto_pair import BtAutoPair
@@ -60,8 +60,9 @@ def client_loop(client: bt.BluetoothSocket, cursor: sqlite3.Cursor):
                 response = encode_flower_data(flower_id, since_time, cursor)
             elif query_type == 'set_watering':
                 flower_id = query.set_watering.flower_id
-                period = query.set_watering.period
-                set_watering(flower_id, period)
+                hour = query.set_watering.hour
+                days = query.set_watering.days
+                set_watering(flower_id, hour, days, cursor)
                 response = encode_watering_set()
             else:
                 continue
@@ -89,6 +90,7 @@ def encode_ids(cursor: sqlite3.Cursor):
 
 
 def encode_flower_data(flower_id, since_time, cursor: sqlite3.Cursor):
+    print(f'Device: {flower_id}, since_time: {since_time}')
     query = f'SELECT * FROM readings ' \
             f'WHERE flower_id = {flower_id} AND timestamp > {since_time}'
     rows = cursor.execute(query)
@@ -125,9 +127,36 @@ def decode_message(raw):
     return query
 
 
-def set_watering(flower_id, period):
-    # TODO implement
-    pass
+def set_watering(flower_id, hour, days, cursor: sqlite3.Cursor):
+    print(f'flower_id: {flower_id}, hour: {hour}, days: {days}')
+    cursor.execute(f'SELECT * FROM watering WHERE flower_id={flower_id}')
+    exists = cursor.fetchone()
+
+    days_string = ','.join([str(day) for day in days])
+    if exists is not None:
+        query = f'INSERT INTO watering VALUES ({flower_id}, {hour}, "{days_string}")'
+        cursor.execute(query)
+    else:
+        cursor.execute(
+            f'UPDATE watering '
+            f'SET hour={hour}, days={days_string} '
+            f'WHERE flower_id={flower_id}'
+        )
+
+    # TODO commit
+    all = cursor.execute('SELECT * FROM watering')
+    all = [row for row in all]
+
+    cronjobs = []
+
+    for (flower_id, hour, days) in all:
+        schedule = f'0 {hour} * * {days}'
+        cmd = f'python3 /home/pi/PlantCare-onboard-central/water.py {flower_id}'
+        cronjobs.append(f'echo \'{schedule} {cmd}\'')
+
+    combined = ';'.join(cronjobs)
+    cmd = f'echo "$({combined})" | crontab -'
+    run(cmd, shell=True, check=True)
 
 
 def print_queries():
@@ -142,7 +171,8 @@ def print_queries():
 
     query = plantcare_pb2.Query()
     query.set_watering.flower_id = 42
-    query.set_watering.period = 9
+    query.set_watering.hour = 9
+    query.set_watering.days.append(2)
     print(f'Set watering: {query.SerializeToString()}')
 
 
