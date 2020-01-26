@@ -133,7 +133,7 @@ def set_watering(flower_id, hour, days, cursor: sqlite3.Cursor, connection: sqli
     exists = cursor.fetchone()
 
     days_string = ','.join([str(day) for day in days])
-    if exists is not None:
+    if exists is None:
         query = f'INSERT INTO watering VALUES ({flower_id}, {hour}, "{days_string}")'
         cursor.execute(query)
     else:
@@ -144,12 +144,14 @@ def set_watering(flower_id, hour, days, cursor: sqlite3.Cursor, connection: sqli
         )
 
     connection.commit()
-    all = cursor.execute('SELECT * FROM watering')
-    all = [row for row in all]
+    cursor.execute('SELECT * FROM watering')
+    all_ids = cursor.fetchall()
 
     cronjobs = []
 
-    for (flower_id, hour, days) in all:
+    for (flower_id, hour, days) in all_ids:
+        if days == '':
+            continue
         schedule = f'0 {hour} * * {days}'
         cmd = f'python3 /home/pi/PlantCare-onboard-central/water.py {flower_id}'
         cronjobs.append(f'echo \'{schedule} {cmd}\'')
