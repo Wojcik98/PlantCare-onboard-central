@@ -9,13 +9,30 @@ COIL_OFF_CMD = 2
 ACK = 42
 BAD_REQUEST = 33
 
+DB_PATH = '/home/pi/PlantCare-onboard-central/plantcare.db'
+
+
+def scan_devices(bus: smbus.SMBus):
+    connected = []
+
+    for device in range(20, 120):
+        try:
+            bus.write_quick(device)
+            connected.append(device)
+        except Exception:
+            pass
+
+    return connected
+
+
 if __name__ == '__main__':
-    connection = sqlite3.connect('plantcare.db')
+    connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
     now = int(time())
 
     bus = smbus.SMBus(1)
-    devices = [0x45]    # TODO scan (device is connected if read_bytes does not throw exception)
+    devices = scan_devices(bus)
+    print(devices)
 
     for device in devices:
         bus.write_byte(device, MEASURE_CMD)

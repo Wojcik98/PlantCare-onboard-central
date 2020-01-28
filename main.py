@@ -6,6 +6,7 @@ from auto_pair import BtAutoPair
 import plantcare_pb2
 
 uuid = 'a08b1a8a-dfac-4606-b2c4-761c06969416'
+DB_PATH = '/home/pi/PlantCare-onboard-central/plantcare.db'
 
 
 def main():
@@ -23,7 +24,7 @@ def setup_pairing():
 def server_loop():
     host = ''
     port = 1
-    connection = sqlite3.connect('plantcare.db')
+    connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
     while True:
@@ -71,7 +72,7 @@ def client_loop(client: bt.BluetoothSocket, cursor: sqlite3.Cursor, connection: 
             client.send(raw_send)
             print(f'Sent {len(raw_send)} bytes: {raw_send}')
 
-        except Exception as e:
+        except bt.btcommon.BluetoothError as e:
             print(e)
             client.close()
             break
@@ -135,13 +136,10 @@ def set_watering(flower_id, hour, days, cursor: sqlite3.Cursor, connection: sqli
     days_string = ','.join([str(day) for day in days])
     if exists is None:
         query = f'INSERT INTO watering VALUES ({flower_id}, {hour}, "{days_string}")'
-        cursor.execute(query)
     else:
-        cursor.execute(
-            f'UPDATE watering '
-            f'SET hour={hour}, days={days_string} '
-            f'WHERE flower_id={flower_id}'
-        )
+        query = f'UPDATE watering SET hour={hour}, days="{days_string}" WHERE flower_id={flower_id}'
+    print(query)
+    cursor.execute(query)
 
     connection.commit()
     cursor.execute('SELECT * FROM watering')
